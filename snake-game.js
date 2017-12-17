@@ -1,6 +1,5 @@
-var snakeLength=5;
 var mapDivElement=document.getElementById("map-element");
-var shouldMakeAnotherMove;
+var shouldMakeAnotherMoveId;
 function SnakeDot(){
 
 }
@@ -50,6 +49,20 @@ var map=
 	[emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace, emptySpace]
 ];
 
+
+function CountSnakeLength(){
+	var counter=0;
+	for (var row = 0; row < map.length; row++) {
+		for (var column = 0; column < map[row].length; column++) {
+		  	if (IsSnakeBodyPoint(row,column)) {
+		  		counter++;
+		  	}
+	  	}
+	}
+	return counter;
+}
+
+var snakeLength=CountSnakeLength();
 var headCurrentPosition;
 var tailCurrentPosition;
 var lastValidDirection="right";
@@ -192,8 +205,7 @@ function MakeNextMove(direction){
 		lastValidDirection=direction;
 		MoveSnake(tempPosition);
 		RenderScreen();
-		shouldMakeAnotherMove=setTimeout(MakeNextMove, 200, direction);
-
+		shouldMakeAnotherMoveId=setTimeout(MakeNextMove, 200, direction);
 	}
 	else{
 		alert("Game over!");
@@ -235,7 +247,7 @@ function IsPositionValid(position) {
 
 
 	document.addEventListener('keydown', function(event) {
-		clearTimeout(shouldMakeAnotherMove);
+		clearTimeout(shouldMakeAnotherMoveId);
 		switch(event.key){
 			case "ArrowUp":
 			MakeNextMove("up");
