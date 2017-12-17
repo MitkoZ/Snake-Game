@@ -1,0 +1,14 @@
+body {
+  	line-height: 0;
+  	margin:0;
+  	background-color: blue;
+}
+
+#map-element {
+	width: 100%;
+	height: auto; 
+}
+
+#map-element>div {
+	display:inline-block;
+}
