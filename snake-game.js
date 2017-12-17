@@ -1,6 +1,6 @@
 var snakeLength=5;
 var mapDivElement=document.getElementById("map-element");
-
+var shouldMakeAnotherMove;
 function SnakeDot(){
 
 }
@@ -189,9 +189,11 @@ function MakeNextMove(direction){
 	var tempPosition=headCurrentPosition;
 	ChooseDirection(direction, tempPosition);
 	if (IsPositionValid(tempPosition)) {
+		lastValidDirection=direction;
 		MoveSnake(tempPosition);
 		RenderScreen();
-		setTimeout(MakeNextMove, 200, direction);
+		shouldMakeAnotherMove=setTimeout(MakeNextMove, 200, direction);
+
 	}
 	else{
 		alert("Game over!");
@@ -230,3 +232,22 @@ function IsPositionValid(position) {
 
 	return true;
 }
+
+
+	document.addEventListener('keydown', function(event) {
+		clearTimeout(shouldMakeAnotherMove);
+		switch(event.key){
+			case "ArrowUp":
+			MakeNextMove("up");
+			break;
+			case "ArrowDown":
+			MakeNextMove("down");
+			break;
+			case "ArrowLeft":
+			MakeNextMove("left");
+			break;
+			case "ArrowRight":
+			MakeNextMove("right");
+			break;
+		}
+	})
