@@ -174,6 +174,25 @@ function GetTailCurrentPosition(){
 }
 
 
+function FindEmptyPosition(position){
+	if (map[position.y][position.x+1]==emptySpace) {
+		position.x++;
+		return position;
+	}
+	else if(map[position.y][position.x-1]==emptySpace){
+		position.x--;
+		return position;
+	}
+	else if(map[position.y+1][position.x]==emptySpace){
+		position.y++;
+		return position;
+	}
+	else if(map[position.y-1][position.x]==emptySpace){
+		position.y--;
+		return position;
+	}
+}
+
 function RemoveTail(){
 	tailCurrentPosition=GetTailCurrentPosition();
 	var tailObject=map[tailCurrentPosition.y][tailCurrentPosition.x];
@@ -187,6 +206,16 @@ function AddNewHead(x, y){
 	var newSnakeDot=new SnakeDot(currentHeadObject);
 	currentHeadObject.NextDot=newSnakeDot;
 	map[y][x]=newSnakeDot;
+}
+
+function AddNewTail(){
+	tailCurrentPosition=GetTailCurrentPosition();
+	var currentTailObject=map[tailCurrentPosition.y][tailCurrentPosition.x];
+	var newTailDot=new SnakeDot();
+	currentTailObject.PreviousDot=newTailDot;
+	newTailDot.NextDot=currentTailObject;
+	var emptyPosition=FindEmptyPosition(tailCurrentPosition);
+	map[emptyPosition.y][emptyPosition.x]=newTailDot;
 }
 
 function MoveSnake(position){
@@ -345,5 +374,10 @@ function UpdatePoints(){
 	isAppleSpawned=false;
 }
 
+function GrowSnake() {
+	AddNewTail();
+}
+
 document.addEventListener("spawn-apple", SpawnApple);
-document.addEventListener("apple-eaten", UpdatePoints)
+document.addEventListener("apple-eaten", UpdatePoints);
+document.addEventListener("apple-eaten", GrowSnake);
