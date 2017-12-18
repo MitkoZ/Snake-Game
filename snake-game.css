@@ -12,3 +12,11 @@ body {
 #map-element>div {
 	display:inline-block;
 }
+
+#points-container {
+	position: absolute;
+	font-size: 40px;
+	top: 50px;
+	right: 15px;
+	color: orange;
+}
