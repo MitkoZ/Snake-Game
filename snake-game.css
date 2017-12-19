@@ -1,12 +1,12 @@
 body {
   	line-height: 0;
   	margin:0;
-  	background-color: blue;
+  	background-image: url("Graphics/background.jpeg");
 }
 
 #map-element {
-	width: 100%;
-	height: auto; 
+	border: solid black 5px;
+	display: inline-block;
 }
 
 #map-element>div {
@@ -17,6 +17,6 @@ body {
 	position: absolute;
 	font-size: 40px;
 	top: 50px;
-	right: 15px;
-	color: orange;
+	left: 31%;
+	color: blue;
 }

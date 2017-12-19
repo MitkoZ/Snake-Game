@@ -79,11 +79,8 @@ function SetMapPointSize(mapPoint, width, height) {
 function SetMapPointBackground(mapPoint, currentRow, currentColumn){
 	var backgroundColor;
 	var currentElement=map[currentRow][currentColumn];
-			if(emptySpace==currentElement){
-				backgroundColor="black";
-			}
-			else if(currentElement instanceof SnakeDot){
-				backgroundColor="white";
+			if(currentElement instanceof SnakeDot){
+				backgroundColor="green";
 			}
 	mapPoint.style.backgroundColor=backgroundColor;
 }
@@ -133,7 +130,6 @@ function RenderScreen(){
 			}
 			else if(IsApplePoint(row, column)){
 				mapPoint.style.backgroundImage="url('Graphics/apple.png')";
-				mapPoint.style.backgroundPosition ="center";
 				mapPoint.style.backgroundSize="20px";
 			}
 
@@ -266,7 +262,8 @@ function MakeNextMove(direction){
 		shouldMakeAnotherMoveId=setTimeout(MakeNextMove, 500, direction);
 	}
 	else{
-		alert("Game over!");
+		var deadEvent=new CustomEvent("dead-event");
+		document.dispatchEvent(deadEvent);
 	}
 }
 
@@ -314,7 +311,7 @@ function SpecialItemChecker(position){
 	}
 }
 
-document.addEventListener("keydown", function(event) {
+function KeydownPress(event) {
 	var direction;
 	switch (event.key){
 		case "ArrowUp":
@@ -336,7 +333,9 @@ document.addEventListener("keydown", function(event) {
 	}
 	clearTimeout(shouldMakeAnotherMoveId);
 	MakeNextMove(direction);
-})
+}
+
+document.addEventListener("keydown", KeydownPress);
 
 
 function GetRandomInteger(minValue, maxValue) {
@@ -386,6 +385,12 @@ function GrowSnake() {
 	AddNewTail();
 }
 
+function GameOver(){
+	alert("Game over");
+	document.removeEventListener("keydown", KeydownPress);
+}
+
 document.addEventListener("spawn-apple", SpawnApple);
 document.addEventListener("apple-eaten", UpdatePoints);
 document.addEventListener("apple-eaten", GrowSnake);
+document.addEventListener("dead-event",	GameOver);
