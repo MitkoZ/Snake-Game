@@ -2,6 +2,7 @@
 // x=column 
 //unless there's something other said
 
+var controls=["right","left", "up", "down"];
 var mapDivElement=document.getElementById("map-element");
 var shouldMakeAnotherMoveId;
 function SnakeDot(){
@@ -174,20 +175,27 @@ function GetTailCurrentPosition(){
 }
 
 
+function IsUndefined(coordinate) {
+	if(typeof coordinate == "undefined"){
+		return true;
+	}
+	return false;
+}
+
 function FindEmptyPosition(position){
-	if (map[position.y][position.x+1]==emptySpace) {
+	if (!IsUndefined(map[position.y][position.x+1]) && map[position.y][position.x+1]==emptySpace) {
 		position.x++;
 		return position;
 	}
-	else if(map[position.y][position.x-1]==emptySpace){
+	else if(!IsUndefined(map[position.y][position.x-1]) && map[position.y][position.x-1]==emptySpace){
 		position.x--;
 		return position;
 	}
-	else if(map[position.y+1][position.x]==emptySpace){
+	else if(!IsUndefined(map[position.y+1]) && map[position.y+1][position.x]==emptySpace){
 		position.y++;
 		return position;
 	}
-	else if(map[position.y-1][position.x]==emptySpace){
+	else if(!IsUndefined(map[position.y-1]) && map[position.y-1][position.x]==emptySpace){
 		position.y--;
 		return position;
 	}
@@ -242,12 +250,7 @@ function ChooseDirection(direction, position){
 }
 
 var isAppleSpawned=false;
-
 function MakeNextMove(direction){
-	if (!IsDirectionValid(direction)) {
-		direction=lastValidDirection; // if it's invalid direction then proceed with the last chosen direction 
-	}
-
 	headCurrentPosition=GetHeadCurrentPosition();
 	var tempPosition=headCurrentPosition;
 	ChooseDirection(direction, tempPosition);
@@ -260,14 +263,14 @@ function MakeNextMove(direction){
 		SpecialItemChecker(tempPosition);
 		MoveSnake(tempPosition);
 		RenderScreen();
-		shouldMakeAnotherMoveId=setTimeout(MakeNextMove, 200, direction);
+		shouldMakeAnotherMoveId=setTimeout(MakeNextMove, 500, direction);
 	}
 	else{
 		alert("Game over!");
 	}
 }
 
-function IsDirectionValid(currentDirection){
+function IsOppositeDirection(currentDirection){
 	var isOppositeDirection = false;
 	if (currentDirection == "right" && lastValidDirection == "left") {
 		isOppositeDirection = true;
@@ -312,28 +315,33 @@ function SpecialItemChecker(position){
 }
 
 document.addEventListener("keydown", function(event) {
-	clearTimeout(shouldMakeAnotherMoveId);
-	switch(event.key){
+	var direction;
+	switch (event.key){
 		case "ArrowUp":
-		MakeNextMove("up");
+			direction="up";
 		break;
 		case "ArrowDown":
-		MakeNextMove("down");
+			direction="down";
 		break;
 		case "ArrowLeft":
-		MakeNextMove("left");
+			direction="left";
 		break;
 		case "ArrowRight":
-		MakeNextMove("right");
+			direction="right";
 		break;
 	}
+
+	if (!controls.includes(direction) || !IsOppositeDirection(direction)) {// if it's invalid direction or opposite then proceed with the last chosen valid direction
+		return;
+	}
+	clearTimeout(shouldMakeAnotherMoveId);
+	MakeNextMove(direction);
 })
+
 
 function GetRandomInteger(minValue, maxValue) {
     return Math.floor(Math.random() * (maxValue - minValue + 1) ) + minValue;
 }
-
-
 
 function GetRandomXAndYCoordinates(xMinValue, xMaxValue, yMinValue, yMaxValue) {// x and y in the normal coordinate plane for parameters
 	var coordinates={x:0, y:0};
