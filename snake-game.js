@@ -3,6 +3,7 @@
 //unless there's something other said
 
 var controls=["right","left", "up", "down"];
+var points=0;
 var mapDivElement=document.getElementById("map-element");
 var shouldMakeAnotherMoveId;
 function SnakeDot(){
@@ -55,19 +56,6 @@ var map=
 ];
 
 
-function CountSnakeLength(){
-	var counter=0;
-	for (var row = 0; row < map.length; row++) {
-		for (var column = 0; column < map[row].length; column++) {
-		  	if (IsSnakeBodyPoint(row, column)) {
-		  		counter++;
-		  	}
-	  	}
-	}
-	return counter;
-}
-
-var snakeLength=CountSnakeLength();
 var headCurrentPosition;
 var tailCurrentPosition;
 var lastValidDirection="right";
@@ -245,17 +233,12 @@ function ChooseDirection(direction, position){
 	}
 }
 
-var isAppleSpawned=false;
 function MakeNextMove(direction){
 	headCurrentPosition=GetHeadCurrentPosition();
 	var tempPosition=headCurrentPosition;
 	ChooseDirection(direction, tempPosition);
 	if (IsPositionValid(tempPosition)) {
 		lastValidDirection=direction;
-		if (isAppleSpawned==false) {
-			var spawnAppleEvent=new CustomEvent("spawn-apple");
-			document.dispatchEvent(spawnAppleEvent);
-		}
 		SpecialItemChecker(tempPosition);
 		MoveSnake(tempPosition);
 		RenderScreen();
@@ -281,11 +264,9 @@ function IsOppositeDirection(currentDirection){
 	else if(currentDirection == "down" && lastValidDirection == "up"){
 		isOppositeDirection = true;
 	}
+	
+	return isOppositeDirection;
 
-	if (isOppositeDirection) {
-		return false;
-	}
-	return true;
 }
 
 function IsPositionValid(position) {
@@ -311,24 +292,36 @@ function SpecialItemChecker(position){
 	}
 }
 
-function KeydownPress(event) {
-	var direction;
+var keyPressed;
+function IsEventKeyValid(event){
+	keyPressed=null;
 	switch (event.key){
 		case "ArrowUp":
-			direction="up";
+			keyPressed="up";
 		break;
 		case "ArrowDown":
-			direction="down";
+			keyPressed="down";
 		break;
 		case "ArrowLeft":
-			direction="left";
+			keyPressed="left";
 		break;
 		case "ArrowRight":
-			direction="right";
+			keyPressed="right";
 		break;
 	}
 
-	if (!controls.includes(direction) || !IsOppositeDirection(direction)) {// if it's invalid direction or opposite then proceed with the last chosen valid direction
+	if (!controls.includes(keyPressed)) {
+		return false;
+	}
+	return true;
+}
+
+function KeydownPress(event) {
+	if (!IsEventKeyValid(event)) {
+		return;
+	}
+	var direction=keyPressed;
+	if (IsOppositeDirection(direction)) {//if it's opposite then proceed with the last chosen valid direction
 		return;
 	}
 	clearTimeout(shouldMakeAnotherMoveId);
@@ -342,13 +335,20 @@ function GetRandomInteger(minValue, maxValue) {
     return Math.floor(Math.random() * (maxValue - minValue + 1) ) + minValue;
 }
 
+function IsEmptySpace(row, column) {
+	if (map[row][column] == emptySpace) {
+		return true;
+	}
+	return false;
+}
+
 function GetRandomXAndYCoordinates(xMinValue, xMaxValue, yMinValue, yMaxValue) {// x and y in the normal coordinate plane for parameters
 	var coordinates={x:0, y:0};
 	do {
 	coordinates.x=GetRandomInteger(xMinValue, xMaxValue);
 	coordinates.y=GetRandomInteger(yMinValue, yMaxValue);	
 	}
-	while(IsSnakeBodyPoint(coordinates.y, coordinates.x));
+	while(!IsEmptySpace(coordinates.y, coordinates.x));
 	return coordinates;
 }
 
@@ -357,28 +357,15 @@ function AddItemToMap(row, column, item){
 	map[row][column]=item;
 }
 
-function RemoveItemFromMap(row, column, item){
-	map[row][column]=emptySpace;
-}
-
-function RemoveApple(coordinates){
-	if (map[coordinates.y][coordinates.x]==apple) {
-		RemoveItemFromMap(coordinates.y, coordinates.x);
-		isAppleSpawned=false;
-	}
-}
-
 function SpawnApple() {
 	var spawnCoordinates = GetRandomXAndYCoordinates(0, map[0].length-1, 0, map.length-1);// x and y in the normal coordinate plane for parameters
 	AddItemToMap(spawnCoordinates.y, spawnCoordinates.x, apple);
-	setTimeout(RemoveApple, 5000, spawnCoordinates);
-	isAppleSpawned=true;
 }
 
 
 function UpdatePoints(){
-	pointsContainer.innerHTML++;
-	isAppleSpawned=false;
+	points++;
+	pointsContainer.innerHTML=points;
 }
 
 function GrowSnake() {
@@ -390,7 +377,18 @@ function GameOver(){
 	document.removeEventListener("keydown", KeydownPress);
 }
 
+function StartGame(event){
+	if(!IsEventKeyValid(event)){
+		return;
+	}
+	var spawnAppleEvent=new CustomEvent("spawn-apple");
+	document.dispatchEvent(spawnAppleEvent);
+	setInterval(SpawnApple, 8000);
+	document.removeEventListener("keydown", StartGame);
+}
+
 document.addEventListener("spawn-apple", SpawnApple);
 document.addEventListener("apple-eaten", UpdatePoints);
 document.addEventListener("apple-eaten", GrowSnake);
 document.addEventListener("dead-event",	GameOver);
+document.addEventListener("keydown", StartGame);
