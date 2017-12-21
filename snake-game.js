@@ -372,18 +372,24 @@ function GrowSnake() {
 	AddNewTail();
 }
 
+var stopSpawningApplesId;
 function GameOver(){
 	alert("Game over");
 	document.removeEventListener("keydown", KeydownPress);
+	document.removeEventListener("spawn-apple", SpawnApple);
+	clearInterval(stopSpawningApplesId);
+}
+
+function TriggerSpawnApple() {
+	var spawnAppleEvent=new CustomEvent("spawn-apple");
+	document.dispatchEvent(spawnAppleEvent);
 }
 
 function StartGame(event){
 	if(!IsEventKeyValid(event)){
 		return;
 	}
-	var spawnAppleEvent=new CustomEvent("spawn-apple");
-	document.dispatchEvent(spawnAppleEvent);
-	setInterval(SpawnApple, 8000);
+	stopSpawningApplesId=setInterval(TriggerSpawnApple, 8000);
 	document.removeEventListener("keydown", StartGame);
 }
 
